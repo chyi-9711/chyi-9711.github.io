@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Telegram Game</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        .grid { display: grid; grid-template-columns: repeat(4, 100px); gap: 5px; margin: 20px auto; }
+        .cell { width: 100px; height: 100px; background: #cdc1b4; font-size: 24px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
+        button { padding: 10px; font-size: 18px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>2048 Telegram 版</h1>
+    <div class="grid" id="grid"></div>
+    <button onclick="restartGame()">重新開始</button>
+
+    <script>
+        const gridSize = 4;
+        let grid = [];
+
+        function initGame() {
+            grid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+            addRandomTile();
+            addRandomTile();
+            drawGame();
+        }
+
+        function addRandomTile() {
+            let emptyCells = [];
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (grid[r][c] === 0) emptyCells.push({ r, c });
+                }
+            }
+            if (emptyCells.length > 0) {
+                let { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                grid[r][c] = Math.random() > 0.1 ? 2 : 4;
+            }
+        }
+
+        function drawGame() {
+            const gridElement = document.getElementById("grid");
+            gridElement.innerHTML = "";
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    let cell = document.createElement("div");
+                    cell.classList.add("cell");
+                    cell.textContent = grid[r][c] || "";
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        function moveLeft() {
+            for (let r = 0; r < gridSize; r++) {
+                let row = grid[r].filter(num => num);
+                for (let i = 0; i < row.length - 1; i++) {
+                    if (row[i] === row[i + 1]) {
+                        row[i] *= 2;
+                        row.splice(i + 1, 1);
+                    }
+                }
+                grid[r] = [...row, ...Array(gridSize - row.length).fill(0)];
+            }
+            addRandomTile();
+            drawGame();
+        }
+
+        function moveRight() {
+            for (let r = 0; r < gridSize; r++) {
+                let row = grid[r].filter(num => num);
+                for (let i = row.length - 1; i > 0; i--) {
+                    if (row[i] === row[i - 1]) {
+                        row[i] *= 2;
+                        row.splice(i - 1, 1);
+                    }
+                }
+                grid[r] = [...Array(gridSize - row.length).fill(0), ...row];
+            }
+            addRandomTile();
+            drawGame();
+        }
+
+        function moveUp() {
+            for (let c = 0; c < gridSize; c++) {
+                let col = [];
+                for (let r = 0; r < gridSize; r++) col.push(grid[r][c]);
+                col = col.filter(num => num);
+                for (let i = 0; i < col.length - 1; i++) {
+                    if (col[i] === col[i + 1]) {
+                        col[i] *= 2;
+                        col.splice(i + 1, 1);
+                    }
+                }
+                for (let r = 0; r < gridSize; r++) grid[r][c] = col[r] || 0;
+            }
+            addRandomTile();
+            drawGame();
+        }
+
+        function moveDown() {
+            for (let c = 0; c < gridSize; c++) {
+                let col = [];
+                for (let r = 0; r < gridSize; r++) col.push(grid[r][c]);
+                col = col.filter(num => num);
+                for (let i = col.length - 1; i > 0; i--) {
+                    if (col[i] === col[i - 1]) {
+                        col[i] *= 2;
+                        col.splice(i - 1, 1);
+                    }
+                }
+                for (let r = 0; r < gridSize; r++) grid[r][c] = col[col.length - gridSize + r] || 0;
+            }
+            addRandomTile();
+            drawGame();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") moveLeft();
+            if (event.key === "ArrowRight") moveRight();
+            if (event.key === "ArrowUp") moveUp();
+            if (event.key === "ArrowDown") moveDown();
+        });
+
+        function restartGame() {
+            initGame();
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
